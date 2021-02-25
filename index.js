@@ -35,7 +35,7 @@ function renderMovieCard(data) {
         <div class="card-footer">
           <button class="btn btn-primary btn-show-movie" data-toggle="modal"
             data-target="#movie-modal" data-id="${item.id}">More</button>
-          <button class="btn btn-info btn-add-favorite">+</button>
+          <button class="btn btn-info btn-add-favorite" data-id="${item.id}">+</button>
         </div>
       </div>
     </div>
@@ -48,9 +48,23 @@ function renderMovieCard(data) {
 panel.addEventListener('click', function onPanelClicked(event) {
   const target = event.target
   if (target.matches('.btn-show-movie')) {
-    showMovieDescription(target.dataset.id)
+    showMovieDescription(Number(target.dataset.id))
+  } else if (target.matches('.btn-add-favorite')) {
+    addToFavorite(Number(target.dataset.id))
   }
 })
+
+function addToFavorite(id) {
+  const favoriteList = JSON.parse(localStorage.getItem('favoriteMovies')) || []
+  const movie = movies.find((movie) => movie.id === id)
+
+  if (favoriteList.some(movie => movie.id === id)) {
+    alert('The movie is already in the list.')
+  }
+  favoriteList.push(movie)
+  console.log(favoriteList)
+  localStorage.setItem('favoriteMovies', JSON.stringify(favoriteList))
+}
 
 function showMovieDescription(id) {
   axios.get(INDEX_URL + id)
