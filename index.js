@@ -3,6 +3,7 @@ const INDEX_URL = BASE_URL + '/api/v1/movies/'
 const POSTER_URL = BASE_URL + '/posters/'
 
 const panel = document.querySelector('#data-panel')
+const searchForm = document.querySelector('#search-form')
 
 const movies = []
 // api request
@@ -72,3 +73,18 @@ function showMovieDescription(id) {
     desc.textContent = data.description
   }
 }
+
+searchForm.addEventListener('submit', function onSearchSubmitted(event) {
+  event.preventDefault()
+
+  const searchInput = document.querySelector('#search-input')
+  const inputValue = searchInput.value.trim().toLowerCase()
+  let searchResult = movies.filter(item => item.title.toLowerCase().includes(inputValue))
+
+  if (searchResult.length === 0) {
+    alert(`There is no movie about: ${inputValue}`)
+    searchResult = movies
+    searchInput.value = ''
+  }
+  renderMovieCard(searchResult)
+})
