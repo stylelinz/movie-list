@@ -18,7 +18,34 @@ axios.get(INDEX_URL)
     console.log(err)
   })
 
-// render 80 movies in the list
+
+
+
+  panel.addEventListener('click', function onPanelClicked(event) {
+    const target = event.target
+    if (target.matches('.btn-show-movie')) {
+      showMovieDescription(Number(target.dataset.id))
+  } else if (target.matches('.btn-add-favorite')) {
+    addToFavorite(Number(target.dataset.id))
+  }
+})
+
+searchForm.addEventListener('submit', function onSearchSubmitted(event) {
+  event.preventDefault()
+
+  const searchInput = document.querySelector('#search-input')
+  const inputValue = searchInput.value.trim().toLowerCase()
+  let searchResult = movies.filter(item => item.title.toLowerCase().includes(inputValue))
+
+  if (searchResult.length === 0) {
+    alert(`There is no movie about: ${inputValue}`)
+    searchResult = movies
+    searchInput.value = ''
+  }
+  renderMovieCard(searchResult)
+})
+
+// render movies in the panel
 function renderMovieCard(data) {
   let rowContent = ''
   data.forEach((item) => {
@@ -45,15 +72,6 @@ function renderMovieCard(data) {
   panel.innerHTML = rowContent
 }
 
-panel.addEventListener('click', function onPanelClicked(event) {
-  const target = event.target
-  if (target.matches('.btn-show-movie')) {
-    showMovieDescription(Number(target.dataset.id))
-  } else if (target.matches('.btn-add-favorite')) {
-    addToFavorite(Number(target.dataset.id))
-  }
-})
-
 function addToFavorite(id) {
   const favoriteList = JSON.parse(localStorage.getItem('favoriteMovies')) || []
   const movie = movies.find((movie) => movie.id === id)
@@ -75,30 +93,16 @@ function showMovieDescription(id) {
     console.error(err);
   })
 
-  function showMovieModal(data) {
-    const title = document.querySelector('#movie-modal-title')
-    const poster = document.querySelector('#movie-modal-image > img')
-    const date = document.querySelector('#movie-modal-date')
-    const desc = document.querySelector('#movie-modal-description')
-
-    title.textContent = data.title
-    poster.src = POSTER_URL + data.image
-    date.textContent = `release at ${data.release_date}`
-    desc.textContent = data.description
-  }
 }
 
-searchForm.addEventListener('submit', function onSearchSubmitted(event) {
-  event.preventDefault()
+function showMovieModal(data) {
+  const title = document.querySelector('#movie-modal-title')
+  const poster = document.querySelector('#movie-modal-image > img')
+  const date = document.querySelector('#movie-modal-date')
+  const desc = document.querySelector('#movie-modal-description')
 
-  const searchInput = document.querySelector('#search-input')
-  const inputValue = searchInput.value.trim().toLowerCase()
-  let searchResult = movies.filter(item => item.title.toLowerCase().includes(inputValue))
-
-  if (searchResult.length === 0) {
-    alert(`There is no movie about: ${inputValue}`)
-    searchResult = movies
-    searchInput.value = ''
-  }
-  renderMovieCard(searchResult)
-})
+  title.textContent = data.title
+  poster.src = POSTER_URL + data.image
+  date.textContent = `release at ${data.release_date}`
+  desc.textContent = data.description
+}
