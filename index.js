@@ -1,9 +1,11 @@
 const BASE_URL = 'https://movie-list.alphacamp.io'
 const INDEX_URL = BASE_URL + '/api/v1/movies/'
 const POSTER_URL = BASE_URL + '/posters/'
+const MOVIES_PER_PAGE = 12
 
 const panel = document.querySelector('#data-panel')
 const searchForm = document.querySelector('#search-form')
+const paginator = document.querySelector('.pagination')
 
 const movies = []
 // api request
@@ -11,13 +13,13 @@ axios.get(INDEX_URL)
   .then(res => {
     const movieList = res.data.results
     movies.push(...movieList)
-    renderMovieCard(movies)
-    // console.log(movies)
+
+    renderMovieCard(getMoviesByPage(1))
+    renderPaginator(movies.length)
   })
   .catch(err => {
     console.log(err)
   })
-
 
 panel.addEventListener('click', function onPanelClicked(event) {
     const target = event.target
@@ -77,6 +79,13 @@ searchForm.addEventListener('submit', function onSearchSubmitted(event) {
   renderMovieCard(searchResult)
 })
 
+paginator.addEventListener('click', function onPaginatorClicked(event) {
+  if (event.target.tagName !== 'A') return
+
+  const pageId = Number(event.target.dataset.id)
+  renderMovieCard(getMoviesByPage(pageId))
+})
+
 // render movies in the panel
 function renderMovieCard(data) {
   let rowContent = ''
@@ -102,4 +111,19 @@ function renderMovieCard(data) {
   `
   })
   panel.innerHTML = rowContent
+}
+
+function renderPaginator(amount) {
+  let rowContent = ''
+  const pageNum = Math.ceil(amount / MOVIES_PER_PAGE)
+  for (let i = 1; i <= pageNum; i++) {
+    rowContent += `<li class="page-item"><a class="page-link" href="#" data-id="${i}">${i}</a></li>`
+  }
+
+  paginator.innerHTML = rowContent
+}
+
+function getMoviesByPage(page) {
+  const startIndex = (page - 1) * MOVIES_PER_PAGE
+  return movies.slice(startIndex, startIndex + MOVIES_PER_PAGE)
 }
