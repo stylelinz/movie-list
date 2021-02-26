@@ -8,6 +8,8 @@ const searchForm = document.querySelector('#search-form')
 const paginator = document.querySelector('.pagination')
 
 const movies = []
+let searchResult = []
+
 // api request
 axios.get(INDEX_URL)
   .then(res => {
@@ -69,14 +71,16 @@ searchForm.addEventListener('submit', function onSearchSubmitted(event) {
 
   const searchInput = document.querySelector('#search-input')
   const inputValue = searchInput.value.trim().toLowerCase()
-  let searchResult = movies.filter(item => item.title.toLowerCase().includes(inputValue))
+  searchResult = movies.filter(item => item.title.toLowerCase().includes(inputValue))
 
   if (searchResult.length === 0) {
     alert(`There is no movie about: ${inputValue}`)
     searchResult = movies
     searchInput.value = ''
   }
-  renderMovieCard(searchResult)
+
+  renderPaginator(searchResult.length)
+  renderMovieCard(getMoviesByPage(1))
 })
 
 paginator.addEventListener('click', function onPaginatorClicked(event) {
@@ -124,6 +128,7 @@ function renderPaginator(amount) {
 }
 
 function getMoviesByPage(page) {
+  const data = searchResult.length ? searchResult : movies
   const startIndex = (page - 1) * MOVIES_PER_PAGE
-  return movies.slice(startIndex, startIndex + MOVIES_PER_PAGE)
+  return data.slice(startIndex, startIndex + MOVIES_PER_PAGE)
 }
