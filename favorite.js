@@ -74,25 +74,3 @@ function renderMovieCard(data) {
   })
   panel.innerHTML = rowContent
 }
-
-function showMovieDescription(id) {
-  axios.get(INDEX_URL + id)
-  .then(res => {
-    showMovieModal(res.data.results)
-  })
-  .catch(err => {
-    console.error(err);
-  })
-
-  function showMovieModal(data) {
-    const title = document.querySelector('#movie-modal-title')
-    const poster = document.querySelector('#movie-modal-image > img')
-    const date = document.querySelector('#movie-modal-date')
-    const desc = document.querySelector('#movie-modal-description')
-
-    title.textContent = data.title
-    poster.src = POSTER_URL + data.image
-    date.textContent = `release at ${data.release_date}`
-    desc.textContent = data.description
-  }
-}
