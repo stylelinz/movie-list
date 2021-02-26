@@ -13,8 +13,38 @@ panel.addEventListener('click', function onPanelClicked(event) {
   const target = event.target
   if (target.matches('.btn-show-movie')) {
     showMovieDescription(Number(target.dataset.id))
-  } else if (target.matches('.btn-add-favorite')) {
-    addToFavorite(Number(target.dataset.id))
+  } else if (target.matches('.btn-remove-favorite')) {
+    removeFromFavorite(Number(target.dataset.id))
+  }
+
+  function showMovieDescription(id) {
+    axios.get(INDEX_URL + id)
+      .then(res => {
+        showMovieModal(res.data.results)
+      })
+      .catch(err => {
+        console.error(err);
+      })
+
+    function showMovieModal(data) {
+      const title = document.querySelector('#movie-modal-title')
+      const poster = document.querySelector('#movie-modal-image > img')
+      const date = document.querySelector('#movie-modal-date')
+      const desc = document.querySelector('#movie-modal-description')
+
+      title.textContent = data.title
+      poster.src = POSTER_URL + data.image
+      date.textContent = `release at ${data.release_date}`
+      desc.textContent = data.description
+    }
+  }
+
+  function removeFromFavorite(id) {
+    const movieIndex = favoriteList.findIndex((movie) => movie.id === id)
+
+    favoriteList.splice(movieIndex, 1)
+    localStorage.setItem('favoriteMovies', JSON.stringify(favoriteList))
+    renderMovieCard(favoriteList)
   }
 })
 
