@@ -6,9 +6,11 @@ const MOVIES_PER_PAGE = 12
 const panel = document.querySelector('#data-panel')
 const searchForm = document.querySelector('#search-form')
 const paginator = document.querySelector('.pagination')
+const viewMode = document.querySelector('#view-modes')
 
 const movies = []
 let searchResult = []
+let currentPage = 1
 
 // api request
 axios.get(INDEX_URL)
@@ -16,17 +18,19 @@ axios.get(INDEX_URL)
     const movieList = res.data.results
     movies.push(...movieList)
 
-    renderMovieCard(getMoviesByPage(1))
+    renderMovieCard(getMoviesByPage(currentPage))
     renderPaginator(movies.length)
   })
   .catch(err => {
     console.log(err)
   })
 
+// Event listeners
+
 panel.addEventListener('click', function onPanelClicked(event) {
-    const target = event.target
-    if (target.matches('.btn-show-movie')) {
-      showMovieDescription(Number(target.dataset.id))
+  const target = event.target
+  if (target.matches('.btn-show-movie')) {
+    showMovieDescription(Number(target.dataset.id))
   } else if (target.matches('.btn-add-favorite')) {
     addToFavorite(Number(target.dataset.id))
   }
@@ -80,15 +84,29 @@ searchForm.addEventListener('submit', function onSearchSubmitted(event) {
   }
 
   renderPaginator(searchResult.length)
-  renderMovieCard(getMoviesByPage(1))
+  renderMovieCard(getMoviesByPage(currentPage))
 })
 
 paginator.addEventListener('click', function onPaginatorClicked(event) {
   if (event.target.tagName !== 'A') return
 
-  const pageId = Number(event.target.dataset.id)
-  renderMovieCard(getMoviesByPage(pageId))
+  currentPage = Number(event.target.dataset.id)
+  renderMovieCard(getMoviesByPage(currentPage))
 })
+
+viewMode.addEventListener('click', function onModeChanges(event) {
+  const target = event.target
+  console.log(target)
+  // const current
+  if (target.matches('#card-mode')) {
+    renderMovieCard(getMoviesByPage(currentPage))
+  }
+  if (target.matches('#list-mode')) {
+    renderMovieList(getMoviesByPage(currentPage))
+  }
+})
+
+// Functions
 
 // render movies in the panel
 function renderMovieCard(data) {
@@ -115,6 +133,25 @@ function renderMovieCard(data) {
   `
   })
   panel.innerHTML = rowContent
+}
+
+// render movies by list (reference from TonyLiao)
+function renderMovieList(data) {
+  let rawContent = '<table class="table"><tbody>'
+  data.forEach((item) => {
+    rawContent += `
+    <tr>
+      <td>${item.title}</td>
+      <td>
+        <button class="btn btn-primary btn-show-movie" data-toggle="modal" data-target="#movie-modal" data-id="${item.id}">More</button>
+        <button class="btn btn-info btn-add-favorite" data-id="${item.id}">+</button>
+      </td>
+    </tr>
+    `
+  })
+
+  rawContent += '</tbody></table>'
+  panel.innerHTML = rawContent
 }
 
 function renderPaginator(amount) {
