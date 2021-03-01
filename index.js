@@ -11,6 +11,7 @@ const viewMode = document.querySelector('#view-modes')
 const movies = []
 let searchResult = []
 let currentPage = 1
+let mode = 'card'
 
 // api request
 axios.get(INDEX_URL)
@@ -18,7 +19,7 @@ axios.get(INDEX_URL)
     const movieList = res.data.results
     movies.push(...movieList)
 
-    renderMovieCard(getMoviesByPage(currentPage))
+    renderMovies(getMoviesByPage(currentPage))
     renderPaginator(movies.length)
   })
   .catch(err => {
@@ -84,35 +85,37 @@ searchForm.addEventListener('submit', function onSearchSubmitted(event) {
   }
 
   renderPaginator(searchResult.length)
-  renderMovieCard(getMoviesByPage(currentPage))
+  renderMovies(getMoviesByPage(currentPage))
 })
 
 paginator.addEventListener('click', function onPaginatorClicked(event) {
   if (event.target.tagName !== 'A') return
 
   currentPage = Number(event.target.dataset.id)
-  renderMovieCard(getMoviesByPage(currentPage))
+  renderMovies(getMoviesByPage(currentPage))
 })
 
 viewMode.addEventListener('click', function onModeChanges(event) {
   const target = event.target
-  console.log(target)
-  // const current
+
   if (target.matches('#card-mode')) {
-    renderMovieCard(getMoviesByPage(currentPage))
+    mode = 'card'
   }
   if (target.matches('#list-mode')) {
-    renderMovieList(getMoviesByPage(currentPage))
+    mode = 'list'
   }
+  renderMovies(getMoviesByPage(currentPage))
 })
 
 // Functions
+function renderMovies(data) {
+  return mode === 'card' ? renderMovieCard(data) : renderMovieList(data)
 
-// render movies in the panel
-function renderMovieCard(data) {
-  let rowContent = ''
-  data.forEach((item) => {
-    rowContent += `
+  // render movies in the panel
+  function renderMovieCard(data) {
+    let rowContent = ''
+    data.forEach((item) => {
+      rowContent += `
   <div class="col-sm-3">
     <div class="mb-2">
       <div class="card">
@@ -131,15 +134,15 @@ function renderMovieCard(data) {
     </div>
   </div>
   `
-  })
-  panel.innerHTML = rowContent
-}
+    })
+    panel.innerHTML = rowContent
+  }
 
-// render movies by list (reference from TonyLiao)
-function renderMovieList(data) {
-  let rawContent = '<table class="table"><tbody>'
-  data.forEach((item) => {
-    rawContent += `
+  // render movies by list (reference from TonyLiao)
+  function renderMovieList(data) {
+    let rawContent = '<table class="table"><tbody>'
+    data.forEach((item) => {
+      rawContent += `
     <tr>
       <td>${item.title}</td>
       <td>
@@ -148,10 +151,11 @@ function renderMovieList(data) {
       </td>
     </tr>
     `
-  })
+    })
 
-  rawContent += '</tbody></table>'
-  panel.innerHTML = rawContent
+    rawContent += '</tbody></table>'
+    panel.innerHTML = rawContent
+  }
 }
 
 function renderPaginator(amount) {
