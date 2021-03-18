@@ -28,84 +28,13 @@ axios.get(INDEX_URL)
 
 // Event listeners
 
-panel.addEventListener('click', function onPanelClicked(event) {
-  const target = event.target
-  if (target.matches('.btn-show-movie')) {
-    showMovieDescription(Number(target.dataset.id))
-  } else if (target.matches('.btn-add-favorite')) {
-    addToFavorite(Number(target.dataset.id))
-  }
+panel.addEventListener('click', onPanelClicked)
 
-  function addToFavorite(id) {
-    const favoriteList = JSON.parse(localStorage.getItem('favoriteMovies')) || []
-    const movie = movies.find((movie) => movie.id === id)
+searchForm.addEventListener('submit', onSearchSubmitted)
 
-    if (favoriteList.some(movie => movie.id === id)) {
-      alert('The movie is already in the list.')
-    }
-    favoriteList.push(movie)
-    console.log(favoriteList)
-    localStorage.setItem('favoriteMovies', JSON.stringify(favoriteList))
-  }
+paginator.addEventListener('click', onPaginatorClicked)
 
-  function showMovieDescription(id) {
-    axios.get(INDEX_URL + id)
-      .then(res => {
-        showMovieModal(res.data.results)
-      })
-      .catch(err => {
-        console.error(err);
-      })
-
-    function showMovieModal(data) {
-      const title = document.querySelector('#movie-modal-title')
-      const poster = document.querySelector('#movie-modal-image > img')
-      const date = document.querySelector('#movie-modal-date')
-      const desc = document.querySelector('#movie-modal-description')
-
-      title.textContent = data.title
-      poster.src = POSTER_URL + data.image
-      date.textContent = `release at ${data.release_date}`
-      desc.textContent = data.description
-    }
-  }
-})
-
-searchForm.addEventListener('submit', function onSearchSubmitted(event) {
-  event.preventDefault()
-
-  const searchInput = document.querySelector('#search-input')
-  const inputValue = searchInput.value.trim().toLowerCase()
-  searchResult = movies.filter(item => item.title.toLowerCase().includes(inputValue))
-
-  if (searchResult.length === 0) {
-    alert(`There is no movie about: ${inputValue}`)
-    searchResult = movies
-    searchInput.value = ''
-  }
-
-  renderPaginator(searchResult.length)
-  renderMovies(getMoviesByPage(currentPage))
-})
-
-paginator.addEventListener('click', function onPaginatorClicked(event) {
-  if (event.target.tagName !== 'A') return
-
-  currentPage = Number(event.target.dataset.id)
-  renderMovies(getMoviesByPage(currentPage))
-})
-
-viewMode.addEventListener('click', function onModeChanges(event) {
-  const target = event.target
-
-  if (target.matches('#card-mode')) {
-    mode = 'card'
-  }
-  if (target.matches('#list-mode')) {
-    mode = 'list'
-  }
-  renderMovies(getMoviesByPage(currentPage))
-})
+viewMode.addEventListener('click', onModeChanges)
 
 // Functions
 function renderMovies(data) {
@@ -172,4 +101,82 @@ function getMoviesByPage(page) {
   const data = searchResult.length ? searchResult : movies
   const startIndex = (page - 1) * MOVIES_PER_PAGE
   return data.slice(startIndex, startIndex + MOVIES_PER_PAGE)
+}
+
+function onPaginatorClicked(event) {
+  if (event.target.tagName !== 'A') return
+
+  currentPage = Number(event.target.dataset.id)
+  renderMovies(getMoviesByPage(currentPage))
+}
+
+function onModeChanges(event) {
+  const target = event.target
+
+  if (target.matches('#card-mode')) {
+    mode = 'card'
+  }
+  if (target.matches('#list-mode')) {
+    mode = 'list'
+  }
+  renderMovies(getMoviesByPage(currentPage))
+}
+
+function onSearchSubmitted(event) {
+  event.preventDefault()
+
+  const searchInput = document.querySelector('#search-input')
+  const inputValue = searchInput.value.trim().toLowerCase()
+  searchResult = movies.filter(item => item.title.toLowerCase().includes(inputValue))
+
+  if (searchResult.length === 0) {
+    alert(`There is no movie about: ${inputValue}`)
+    searchResult = movies
+    searchInput.value = ''
+  }
+
+  renderPaginator(searchResult.length)
+  renderMovies(getMoviesByPage(currentPage))
+}
+
+function onPanelClicked(event) {
+  const target = event.target
+  if (target.matches('.btn-show-movie')) {
+    showMovieDescription(Number(target.dataset.id))
+  } else if (target.matches('.btn-add-favorite')) {
+    addToFavorite(Number(target.dataset.id))
+  }
+}
+
+function addToFavorite(id) {
+  const favoriteList = JSON.parse(localStorage.getItem('favoriteMovies')) || []
+  const movie = movies.find((movie) => movie.id === id)
+
+  if (favoriteList.some(movie => movie.id === id)) {
+    alert('The movie is already in the list.')
+  }
+  favoriteList.push(movie)
+  localStorage.setItem('favoriteMovies', JSON.stringify(favoriteList))
+}
+
+function showMovieDescription(id) {
+  axios.get(INDEX_URL + id)
+    .then(res => {
+      showMovieModal(res.data.results)
+    })
+    .catch(err => {
+      console.error(err)
+    })
+}
+
+function showMovieModal(data) {
+  const title = document.querySelector('#movie-modal-title')
+  const poster = document.querySelector('#movie-modal-image > img')
+  const date = document.querySelector('#movie-modal-date')
+  const desc = document.querySelector('#movie-modal-description')
+
+  title.textContent = data.title
+  poster.src = POSTER_URL + data.image
+  date.textContent = `release at ${data.release_date}`
+  desc.textContent = data.description
 }
